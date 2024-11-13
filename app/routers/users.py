@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Query, status
 
-from app.routers.dependencies import UnitOfWorkDep, get_current_user_id, get_user_service
+from app.routers.dependencies import UnitOfWorkDep, get_current_user, get_user_service
 from app.schemas.users import UserList, UserPartialUpdate, UserSignUp, UserUpdate
 
 router = APIRouter(prefix='/users', tags=['Users'])
@@ -58,9 +58,9 @@ async def update_user(
     data: UserUpdate,
     unit_of_work: UnitOfWorkDep,
     service: get_user_service,
-    current_user_id: get_current_user_id,
+    current_user: get_current_user,
 ):
-    return await service.update(unit_of_work, user_id, data, current_user_id=current_user_id)
+    return await service.update(unit_of_work, user_id, data, current_user_id=current_user.id)
 
 
 @router.patch(
@@ -75,9 +75,9 @@ async def partial_update_user(
     data: UserPartialUpdate,
     unit_of_work: UnitOfWorkDep,
     service: get_user_service,
-    current_user_id: get_current_user_id,
+    current_user: get_current_user,
 ):
-    return await service.partial_update(unit_of_work, user_id, data, current_user_id=current_user_id)
+    return await service.partial_update(unit_of_work, user_id, data, current_user_id=current_user.id)
 
 
 @router.delete(
@@ -90,6 +90,6 @@ async def delete_user(
     user_id: int,
     unit_of_work: UnitOfWorkDep,
     service: get_user_service,
-    current_user_id: get_current_user_id,
+    current_user: get_current_user,
 ):
-    return await service.delete(unit_of_work, user_id, current_user_id=current_user_id)
+    return await service.delete(unit_of_work, user_id, current_user_id=current_user.id)

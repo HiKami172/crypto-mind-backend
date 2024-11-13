@@ -1,25 +1,51 @@
 from fastapi import APIRouter, Cookie
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 
 from app.settings import settings
-from app.routers.dependencies import get_auth_service
-from app.schemas.auth import Token
-from app.schemas.users import UserSignIn
+from app.routers.dependencies import get_auth_service, UnitOfWorkDep
+from app.schemas import UserSignIn, UserSignUp, Token
 
 router = APIRouter(tags=['Auth'])
 
 
 @router.post(
-    '/login/',
+    '/signup',
+    description='Create a new user and connected organization.'
+)
+async def sign_up(
+        data: UserSignUp,
+        unit_of_work: UnitOfWorkDep,
+        service: get_auth_service,
+):
+    result = await service.signup(unit_of_work, data)
+    response = result['response'] | {'token': result['token'].model_dump()}
+    response = JSONResponse(response)
+    response.set_cookie(
+        key='refresh_token',
+        value=result['token'].refresh_token.token,
+        httponly=True,
+        max_age=settings.auth.refresh_expire * 60,
+        expires=settings.auth.refresh_expire * 60,
+        secure=True,
+        samesite="none"
+    )
+
+    return response
+
+
+@router.post(
+    '/signin/',
     description='Obtain access token via user credentials.',
 )
-async def login(data: UserSignIn, auth_service: get_auth_service):
-    result = await auth_service.signin(user_in=data)
-    response = Response(result.json(exclude_none=True))
+async def sign_in(data: UserSignIn, auth_service: get_auth_service):
+    result = await auth_service.signin(data)
+    response = result['response'] | {'token': result['token'].model_dump()}
+
+    response = JSONResponse(response)
     if data.keep_logged_in:
         response.set_cookie(
             key='refresh_token',
-            value=result.refresh_token.token,
+            value=result['token'].refresh_token.token,
             httponly=True,
             max_age=settings.auth.refresh_expire * 60,
             expires=settings.auth.refresh_expire * 60,
@@ -39,9 +65,9 @@ async def refresh(auth_service: get_auth_service, refresh_token: str = Cookie(No
 
 
 @router.get(
-    '/logout/',
+    '/signout/',
     description='Remove refresh token',
 )
-async def logout(response: Response):
+async def signout(response: Response):
     response.delete_cookie("refresh_token")
     return {"status": "success"}

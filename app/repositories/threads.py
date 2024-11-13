@@ -9,6 +9,7 @@ class ThreadRepository(SQLAlchemyRepository):
     model = Thread
     default_order_by = '-created_at'
 
+
     async def get_thread_messages_by_id(self, **whereclauses) -> Thread:
         statement = (
             select(self.model)

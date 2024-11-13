@@ -2,8 +2,14 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from app.schemas import mixins
+from app.schemas.mixins import EmailRequiredMixin
 
 PhoneNumber.phone_format = 'E164'
+
+class UserBase(EmailRequiredMixin, BaseModel):
+    name: str
+    model_config = ConfigDict(from_attributes=True)
+
 
 
 class UserUpdate(mixins.PasswordRequiredMixin, BaseModel):

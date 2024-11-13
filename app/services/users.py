@@ -3,14 +3,13 @@ from typing import Callable
 from app.exceptions.auth_exceptions import PermissionDenied
 from app.models import User
 from app.schemas.users import UserPartialUpdate, UserSignUp, UserUpdate
+from app.utils.conversions import alchemy_to_dict
 from app.utils.password import get_hash
 from app.utils.unitofwork import IUnitOfWork
 
 
 class UserService:
-    fields_to_convert: list[set[str, Callable]] = [
-        ('password', get_hash),
-    ]
+    fields_to_convert: list[set[str, Callable]] = [('password', get_hash)]
 
     async def create(self, unit_of_work: IUnitOfWork, user: UserSignUp) -> User:
         data = user.model_dump()
@@ -26,7 +25,10 @@ class UserService:
 
     async def retrieve(self, unit_of_work: IUnitOfWork, user_id: int) -> User:
         async with unit_of_work:
-            return await unit_of_work.users.retrieve(pk=user_id)
+            user = await unit_of_work.users.retrieve(pk=user_id)
+        user_response = alchemy_to_dict(user)
+        user_response.pop("password", None)
+        return user_response
 
     async def update(
         self,

@@ -4,6 +4,15 @@ from pydantic import UUID4, BaseModel, Field, field_validator
 from pydantic_core.core_schema import FieldValidationInfo
 
 
+class ThreadCreateRequest(BaseModel):
+    user_id: int = Field(description="ID of the user.")
+    first_message: str = Field(description="First message of the thread.")
+
+
+class ThreadCreateResponse(BaseModel):
+    thread_id: UUID4 = Field(description='Thread ID')
+
+
 class CreateQuestion(BaseModel):
     text: str = Field(
         description='User question. Must be at least 1 and no more than 500 characters.',

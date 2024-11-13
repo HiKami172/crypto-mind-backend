@@ -1,11 +1,13 @@
 from .auth import RefreshData, Token, TokenData, UserLogin, UserRegister
-from .users import UserSignUp
+from .users import UserSignUp, UserSignIn
 from .threads import (
     CreateQuestion,
     FilterQuery,
     Question,
     ThreadList,
     ThreadRetrieveRequest,
+    ThreadCreateRequest,
+    ThreadCreateResponse
 )
 
 __all__ = [
@@ -13,11 +15,13 @@ __all__ = [
     'Token',
     'TokenData',
     'UserSignUp',
-    'UserLogin',
+    'UserSignIn',
     'UserRegister',
     'Question',
     'ThreadList',
     'ThreadRetrieveRequest',
     'FilterQuery',
     'CreateQuestion',
+    'ThreadCreateRequest',
+    'ThreadCreateResponse'
 ]

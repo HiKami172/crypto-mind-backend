@@ -5,7 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.settings import settings
 from app.database import engine
-from app.routers import users, auth, health_check, me
+from app.routers import users, auth, health_check, me, threads
 
 
 @asynccontextmanager
@@ -22,6 +22,7 @@ def create_application() -> FastAPI:
     app.include_router(auth)
     app.include_router(health_check)
     app.include_router(me)
+    app.include_router(threads)
 
     app.add_middleware(
         CORSMiddleware,
