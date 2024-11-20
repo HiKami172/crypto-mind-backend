@@ -5,8 +5,9 @@ from pydantic_core.core_schema import FieldValidationInfo
 
 
 class ThreadCreateRequest(BaseModel):
-    user_id: int = Field(description="ID of the user.")
+    title: str
     first_message: str = Field(description="First message of the thread.")
+
 
 
 class ThreadCreateResponse(BaseModel):
@@ -80,7 +81,7 @@ class ThreadList(BaseModel):
 
 
 class ThreadRetrieveRequest(BaseModel):
-    id: str = Field(description='Thread ID')
+    id: UUID4 = Field(description='Thread ID')
 
 
 class ThreadMessagesByIdResponse(Thread):
