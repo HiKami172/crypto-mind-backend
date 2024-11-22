@@ -6,6 +6,7 @@ starlette
 sqlalchemy
 psycopg2-binary
 asyncpg
+fastapi-users[sqlalchemy,oauth]
 alembic
 
 pydantic-settings

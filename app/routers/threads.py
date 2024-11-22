@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Query, status
 from pydantic import UUID4
 
-from app.routers.dependencies import UnitOfWorkDep, get_current_user, get_threads_service, get_user_service
+from app.routers.dependencies import UnitOfWorkDep, current_active_user, get_threads_service
 from app.schemas.threads import ThreadList, ThreadCreateRequest, ThreadCreateResponse, Thread
 
 router = APIRouter(prefix='/threads', tags=['Threads'])
@@ -29,8 +29,8 @@ async def create_thread(data: ThreadCreateRequest, unit_of_work: UnitOfWorkDep, 
 )
 async def get_threads(
     unit_of_work: UnitOfWorkDep,
-    service: get_user_service,
-    current_user: get_current_user,
+    service: get_threads_service,
+    current_user: current_active_user,
     page: Annotated[int | None, Query(ge=1)] = 1,
     per_page: Annotated[int | None, Query(ge=1, le=30)] = 10,
 ):
@@ -58,7 +58,7 @@ async def delete_thread(
     user_id: int,
     unit_of_work: UnitOfWorkDep,
     service: get_threads_service,
-    current_user: get_current_user,
+    current_user: current_active_user,
 ):
     return await service.delete(unit_of_work, user_id, current_user_id=current_user.id)
 
@@ -75,7 +75,7 @@ async def get_messages(
         thread_id: str,
         unit_of_work: UnitOfWorkDep,
         service: get_threads_service,
-        current_user: get_current_user,
+        current_user: current_active_user,
 ):
     return await service.get_messages(unit_of_work, thread_id, current_user.id)
 
@@ -91,6 +91,6 @@ async def send_message(
         message: str,
         unit_of_work: UnitOfWorkDep,
         service: get_threads_service,
-        current_user: get_current_user,
+        current_user: current_active_user,
 ):
     return await service.send_message(unit_of_work, thread_id, message, current_user.id)
