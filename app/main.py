@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
 
+from app.middlewares.context import RequestMiddleware
 from app.settings import settings
 from app.database import engine
 from app.routers import health_check,threads, auth, users
@@ -30,6 +31,7 @@ def create_application() -> FastAPI:
         allow_methods=settings.ALLOWED_METHODS,
         allow_headers=settings.ALLOWED_HEADERS,
     )
+    app.add_middleware(RequestMiddleware)
     return app
 
 
