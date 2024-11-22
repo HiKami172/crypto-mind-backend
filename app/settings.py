@@ -51,6 +51,14 @@ class AuthSettings(BaseSettings):
     refresh_expire: int = Field(alias='REFRESH_TOKEN_EXPIRE_MINUTES')
 
 
+class OAuthSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=env_file, extra='ignore')
+
+    GOOGLE_CLIENT_ID: str | None
+    GOOGLE_CLIENT_SECRET: str | None
+    GOOGLE_REDIRECT_URI: str | None
+
+
 class Settings(BaseSettings):
     BROKER_ANALYTICS: int
     DEBUG: bool
@@ -75,6 +83,7 @@ class Settings(BaseSettings):
     database: DBSettings = DBSettings()
     llm: LLMSettings = LLMSettings()
     auth: AuthSettings = AuthSettings()
+    oauth: OAuthSettings = OAuthSettings()
 
     model_config = SettingsConfigDict(env_file=env_file, extra='ignore')
 

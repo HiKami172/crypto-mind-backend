@@ -1,73 +1,22 @@
-from fastapi import APIRouter, Cookie
-from fastapi.responses import Response, JSONResponse
+from fastapi import APIRouter
 
+from app.routers.dependencies import auth_backend, fastapi_users, google_oauth_client
+from app.schemas import UserCreate, UserRead
 from app.settings import settings
-from app.routers.dependencies import get_auth_service, UnitOfWorkDep
-from app.schemas import UserSignIn, UserSignUp, Token
 
-router = APIRouter(tags=['Auth'])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
-@router.post(
-    '/signup',
-    description='Create a new user and connected organization.'
+router.include_router(fastapi_users.get_auth_router(auth_backend))
+router.include_router(fastapi_users.get_register_router(UserRead, UserCreate))
+router.include_router(fastapi_users.get_verify_router(UserRead))
+router.include_router(fastapi_users.get_reset_password_router())
+router.include_router(
+    fastapi_users.get_oauth_router(
+        google_oauth_client,
+        auth_backend,
+        settings.auth.key,
+        redirect_url="http://localhost:3000/associate/google/callback",
+        is_verified_by_default=True
+    ),
+    prefix="/google"
 )
-async def sign_up(
-        data: UserSignUp,
-        unit_of_work: UnitOfWorkDep,
-        service: get_auth_service,
-):
-    result = await service.signup(unit_of_work, data)
-    response = result['response'] | {'token': result['token'].model_dump()}
-    response = JSONResponse(response)
-    response.set_cookie(
-        key='refresh_token',
-        value=result['token'].refresh_token.token,
-        httponly=True,
-        max_age=settings.auth.refresh_expire * 60,
-        expires=settings.auth.refresh_expire * 60,
-        secure=True,
-        samesite="none"
-    )
-
-    return response
-
-
-@router.post(
-    '/signin/',
-    description='Obtain access token via user credentials.',
-)
-async def sign_in(data: UserSignIn, auth_service: get_auth_service):
-    result = await auth_service.signin(data)
-    response = result['response'] | {'token': result['token'].model_dump()}
-
-    response = JSONResponse(response)
-    if data.keep_logged_in:
-        response.set_cookie(
-            key='refresh_token',
-            value=result['token'].refresh_token.token,
-            httponly=True,
-            max_age=settings.auth.refresh_expire * 60,
-            expires=settings.auth.refresh_expire * 60,
-            secure=True,
-            samesite="none"
-        )
-    return response
-
-
-@router.post(
-    '/refresh/',
-    response_model=Token,
-    description='Obtain new access token from refresh token',
-)
-async def refresh(auth_service: get_auth_service, refresh_token: str = Cookie(None)):
-    return await auth_service.refresh_token(refresh_token=refresh_token)
-
-
-@router.get(
-    '/signout/',
-    description='Remove refresh token',
-)
-async def signout(response: Response):
-    response.delete_cookie("refresh_token")
-    return {"status": "success"}
