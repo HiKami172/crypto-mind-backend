@@ -7,7 +7,7 @@ from app.middlewares.context import RequestMiddleware
 from app.settings import settings
 from app.database import engine
 from app.routers import health_check,threads, auth, users
-
+from app.events import register_events
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -18,7 +18,10 @@ async def lifespan(_app: FastAPI):
 
 
 def create_application() -> FastAPI:
+
     app = FastAPI(lifespan=lifespan)
+    register_events()
+
     app.include_router(users)
     app.include_router(auth)
     app.include_router(health_check)

@@ -53,6 +53,7 @@ async def get_user_manager(user_db=Depends(get_user_db)):
 fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
 
 current_active_user = fastapi_users.current_user(active=True)
+get_current_user = Annotated[User, Depends(current_active_user)]
 
 google_oauth_client = GoogleOAuth2(
     client_id=settings.oauth.GOOGLE_CLIENT_ID,
@@ -62,6 +63,7 @@ google_oauth_client = GoogleOAuth2(
 
 
 UnitOfWorkDep = Annotated[IUnitOfWork, Depends(UnitOfWork)]
+
 
 get_threads_service = Annotated[ThreadService, Depends(ThreadService)]
 
