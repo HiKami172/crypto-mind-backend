@@ -41,9 +41,11 @@ class Message(Base):
         Enum("user", "assistant", "tool", name="chat_role_enum", create_type=False),
         default='user'
     )
-    text: Mapped[str] = mapped_column(Text)
+    content: Mapped[str] = mapped_column(Text)
     created_at: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now(), default=func.now(), index=True)
 
     thread_id: Mapped[UUID] = mapped_column(ForeignKey('thread.id'))
 
     thread: Mapped['Thread'] = relationship('Thread', back_populates='messages')
+
+

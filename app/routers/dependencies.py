@@ -11,7 +11,7 @@ from fastapi_users.authentication import (
 )
 from app.database import User, get_user_db
 from app.settings import settings
-from app.services import ThreadService
+from app.services import ThreadService, BinanceService
 from app.utils.unitofwork import IUnitOfWork, UnitOfWork
 
 bearer_transport = BearerTransport(tokenUrl="auth/login")
@@ -53,6 +53,7 @@ async def get_user_manager(user_db=Depends(get_user_db)):
 fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
 
 current_active_user = fastapi_users.current_user(active=True)
+get_current_user = Annotated[User, Depends(current_active_user)]
 
 google_oauth_client = GoogleOAuth2(
     client_id=settings.oauth.GOOGLE_CLIENT_ID,
@@ -60,10 +61,20 @@ google_oauth_client = GoogleOAuth2(
     scopes=["openid", "email", "profile"]
 )
 
-
 UnitOfWorkDep = Annotated[IUnitOfWork, Depends(UnitOfWork)]
 
 get_threads_service = Annotated[ThreadService, Depends(ThreadService)]
 
 
-
+async def get_binance_service() -> BinanceService:
+    service = BinanceService(
+        api_key=settings.binance.BINANCE_API_KEY,
+        api_secret=settings.binance.BINANCE_API_SECRET,
+        testnet_api_key=settings.binance.TESTNET_BINANCE_API_KEY,
+        testnet_api_secret=settings.binance.TESTNET_BINANCE_API_SECRET
+    )
+    await service.connect()
+    try:
+        yield service
+    finally:
+        await service.close()

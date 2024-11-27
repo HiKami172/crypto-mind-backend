@@ -46,10 +46,10 @@ class SQLAlchemyRepository(AbstractRepository):
     async def create(self, **kwargs) -> M:
         logger.debug('Adding new {model_name}', model_name=self.model_name.lower())
 
-        statement = insert(self.model).values(**kwargs).returning(self.model)
-        result: Result = await self.execute(statement)
-
-        return await self.fetch_data(result.scalar_one)
+        obj = self.model(**kwargs)
+        self.session.add(obj)
+        await self.session.commit()
+        return obj
 
     async def list(
         self, *, limit: int = None, offset: int = None, order_by: list[str] = None, **filter_by

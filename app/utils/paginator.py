@@ -15,43 +15,49 @@ class Paginator:
         per_page: int,
         fetch_method: str = 'scalars',
         add_extra_page: bool = False,
+        is_reversed: bool = False  # New attribute for reversed pagination
     ):
         self.session = session
         self.fetch_method = fetch_method
         self.query = query
         self.page = page
         self.per_page = self.limit = per_page
-        self.offset = (page - 1) * per_page
+        self.offset = 0
+        self.is_reversed = is_reversed
         self.request = request_object.get()
         self.extra_page = add_extra_page
-        # computed later
         self.number_of_pages = 0
-        self.next_page = ''
-        self.previous_page = ''
+        self.next_page = None
+        self.previous_page = None
 
-    def _get_next_page(self) -> str | None:
+    def _get_next_page(self) -> int | None:
         if self.page >= self.number_of_pages:
-            return
-        url = self.request.url.include_query_params(page=self.page + 1)
-        return str(url)
+            return None
+        return self.page + 1
 
-    def _get_previous_page(self) -> str | None:
-        if self.page == 1:
-            return
+    def _get_previous_page(self) -> int | None:
+        if self.page <= 1:
+            return None
         if self.page > self.number_of_pages:
             if not self.extra_page:
-                return
-            # Last page
-            url = self.request.url.include_query_params(page=self.number_of_pages - 1)
+                return None
             self.offset = (self.number_of_pages - 1) * self.per_page
-        else:
-            # Previous page
-            url = self.request.url.include_query_params(page=self.page - 1)
-        return str(url)
+            return self.number_of_pages - 1
+        return self.page - 1
 
     async def get_response(self) -> dict:
+        count = await self._get_total_count()
+        if self.is_reversed:
+            offset = count - (self.page * self.per_page)
+            if offset < 0:
+                self.limit = offset + self.per_page
+                offset = 0
+            self.offset = offset
+        else:
+            self.offset = (self.page - 1) * self.per_page
         return {
-            'count': await self._get_total_count(),
+            'offset': self.offset,
+            'count': count,
             'next_page': self._get_next_page(),
             'previous_page': self._get_previous_page(),
             'items': await self._get_items(),
@@ -87,6 +93,7 @@ async def paginate(
     per_page: int,
     fetch_method: str = 'scalars',
     add_extra_page: bool = False,
+    is_reversed: bool = False
 ) -> dict:
     paginator = Paginator(
         session,
@@ -95,5 +102,6 @@ async def paginate(
         per_page,
         fetch_method=fetch_method,
         add_extra_page=add_extra_page,
+        is_reversed=is_reversed
     )
     return await paginator.get_response()

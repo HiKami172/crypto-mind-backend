@@ -1,12 +1,12 @@
 from datetime import datetime
+from typing import Optional, List
 
 from pydantic import UUID4, BaseModel, Field, field_validator
 from pydantic_core.core_schema import FieldValidationInfo
 
 
 class ThreadCreateRequest(BaseModel):
-    user_id: int = Field(description="ID of the user.")
-    first_message: str = Field(description="First message of the thread.")
+    title: str
 
 
 class ThreadCreateResponse(BaseModel):
@@ -80,7 +80,7 @@ class ThreadList(BaseModel):
 
 
 class ThreadRetrieveRequest(BaseModel):
-    id: str = Field(description='Thread ID')
+    id: UUID4 = Field(description='Thread ID')
 
 
 class ThreadMessagesByIdResponse(Thread):
@@ -88,3 +88,20 @@ class ThreadMessagesByIdResponse(Thread):
 
     class Config:
         from_attributes = True
+
+
+class MessageSchema(BaseModel):
+    role: str
+    content: str
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class PaginatedMessagesResponse(BaseModel):
+    offset: int
+    count: int
+    next_page: Optional[int]
+    previous_page: Optional[int]
+    items: List[MessageSchema]
