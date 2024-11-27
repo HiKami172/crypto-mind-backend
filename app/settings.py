@@ -40,6 +40,8 @@ class BinanceSettings(BaseSettings):
 
     BINANCE_API_KEY: str | None
     BINANCE_API_SECRET: str | None
+    TESTNET_BINANCE_API_KEY: str | None
+    TESTNET_BINANCE_API_SECRET: str | None
 
 
 class AuthSettings(BaseSettings):
@@ -82,6 +84,7 @@ class Settings(BaseSettings):
 
     database: DBSettings = DBSettings()
     llm: LLMSettings = LLMSettings()
+    binance: BinanceSettings = BinanceSettings()
     auth: AuthSettings = AuthSettings()
     oauth: OAuthSettings = OAuthSettings()
 
