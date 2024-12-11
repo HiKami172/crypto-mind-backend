@@ -1,8 +1,7 @@
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import BaseMessage
 from langgraph.prebuilt import create_react_agent
 
-from app.inference.analyzer.tools import toolkit
+from app.inference.chat.tools import toolkit
 
 
 class ChatModel:
