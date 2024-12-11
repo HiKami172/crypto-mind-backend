@@ -43,6 +43,6 @@ jobs:
       # Replace <YourResourceGroup> and 'crypto-mind-backend' with your actual resource group and app name
       - name: Configure Web App to use the container
         run: az webapp config container set \
-              --resource-group <YourResourceGroup> \
+              --resource-group crypto-mind-rg \
               --name crypto-mind-backend \
               --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:latest
