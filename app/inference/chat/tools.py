@@ -1,8 +1,22 @@
 from langchain_core.tools import tool
+from binance.client import Client
+from app.settings import settings
+
+# client = Client(
+#     api_key=settings.binance.BINANCE_API_KEY,
+#     api_secret=settings.binance.BINANCE_API_SECRET,
+# )
+
+test_client = Client(
+    api_key=settings.binance.TESTNET_BINANCE_API_KEY,
+    api_secret=settings.binance.TESTNET_BINANCE_API_SECRET,
+    testnet=True
+)
 
 
 @tool
-def place_order(symbol: str, side: str, order_type: str, quantity: float, price: float = None, stop_price: float = None, time_in_force: str = 'GTC'):
+def place_order(symbol: str, side: str, order_type: str, quantity: float, price: float = None, stop_price: float = None,
+                time_in_force: str = 'GTC'):
     """
     Places an order on Binance based on the provided parameters.
 
@@ -22,25 +36,23 @@ def place_order(symbol: str, side: str, order_type: str, quantity: float, price:
         place_order('BTCUSDT', 'BUY', 'LIMIT', 0.001, price=30000, time_in_force='GTC')
         place_order('ETHUSDT', 'SELL', 'MARKET', 0.5)
     """
-    order_params = {
-        'symbol': symbol,
-        'side': side,
-        'type': order_type,
-        'quantity': quantity,
-        'timeInForce': time_in_force
-    }
+    try:
+        order_params = {
+            'symbol': symbol,
+            'side': side,
+            'type': order_type,
+            'quantity': quantity,
+            'timeInForce': time_in_force if order_type == 'LIMIT' else None,
+            'price': price,
+            'stopPrice': stop_price
+        }
+        order_params = {k: v for k, v in order_params.items() if v is not None}
 
-    if price is not None:
-        order_params['price'] = price
+        response = test_client.create_order(**order_params)
+        return response
+    except Exception as e:
+        return {"error": str(e)}
 
-    if stop_price is not None:
-        order_params['stopPrice'] = stop_price
-
-    # Example API call (You need to replace with actual Binance API request)
-    # response = client.new_order(**order_params)
-    response = {"status": "order placed"}  # Placeholder for actual API call
-
-    return response
 
 @tool
 def check_balance(asset: str):
@@ -57,10 +69,11 @@ def check_balance(asset: str):
         check_balance('BTC')
     """
     # Example API call to get account balances (Replace with actual Binance API call)
-    # response = client.get_account()
-    response = {"asset": asset, "free": 0.5, "locked": 0.0}  # Placeholder
+    print('GET ASSET BALANCE TOOL CALL')
+    response = test_client.get_account()
+    balances = response['balances']
+    return next((item for item in balances if item["asset"] == asset), None)
 
-    return response
 
 @tool
 def get_latest_price(symbol: str):
@@ -76,11 +89,12 @@ def get_latest_price(symbol: str):
     Example:
         get_latest_price('BTCUSDT')
     """
-    # Example API call (Replace with actual Binance API call)
-    # response = client.get_symbol_ticker(symbol=symbol)
-    response = {"symbol": symbol, "price": 29500.00}  # Placeholder for actual API response
+    try:
+        response = test_client.get_symbol_ticker(symbol=symbol)
+        return response
+    except Exception as e:
+        return {"error": str(e)}
 
-    return response
 
 @tool
 def get_open_orders(symbol: str = None):
@@ -97,14 +111,12 @@ def get_open_orders(symbol: str = None):
         get_open_orders('BTCUSDT')
         get_open_orders()
     """
-    # Example API call (Replace with actual Binance API call)
-    # response = client.get_open_orders(symbol=symbol)
-    response = [
-        {"symbol": "BTCUSDT", "orderId": 12345, "price": 30000, "quantity": 0.001},
-        {"symbol": "ETHUSDT", "orderId": 12346, "price": 2000, "quantity": 0.5}
-    ]  # Placeholder for actual API response
+    try:
+        response = test_client.get_open_orders(symbol=symbol)
+        return response
+    except Exception as e:
+        return {"error": str(e)}
 
-    return response
 
 @tool
 def cancel_order(symbol: str, order_id: int):
@@ -121,11 +133,12 @@ def cancel_order(symbol: str, order_id: int):
     Example:
         cancel_order('BTCUSDT', 12345)
     """
-    # Example API call (Replace with actual Binance API call)
-    # response = client.cancel_order(symbol=symbol, orderId=order_id)
-    response = {"status": "order canceled", "orderId": order_id}  # Placeholder for actual API response
+    try:
+        response = test_client.cancel_order(symbol=symbol, orderId=order_id)
+        return response
+    except Exception as e:
+        return {"error": str(e)}
 
-    return response
 
 @tool
 def check_order_status(symbol: str, order_id: int):
@@ -142,11 +155,12 @@ def check_order_status(symbol: str, order_id: int):
     Example:
         check_order_status('BTCUSDT', 12345)
     """
-    # Example API call (Replace with actual Binance API call)
-    # response = client.get_order(symbol=symbol, orderId=order_id)
-    response = {"symbol": symbol, "orderId": order_id, "status": "FILLED"}  # Placeholder for actual API response
+    try:
+        response = test_client.get_order(symbol=symbol, orderId=order_id)
+        return response
+    except Exception as e:
+        return {"error": str(e)}
 
-    return response
 
 @tool
 def get_recent_trades(symbol: str, limit: int = 10):
@@ -163,14 +177,11 @@ def get_recent_trades(symbol: str, limit: int = 10):
     Example:
         get_recent_trades('BTCUSDT', limit=5)
     """
-    # Example API call (Replace with actual Binance API call)
-    # response = client.get_recent_trades(symbol=symbol, limit=limit)
-    response = [
-        {"price": 29400.00, "quantity": 0.002, "time": "2024-10-22T10:00:00Z"},
-        {"price": 29500.00, "quantity": 0.001, "time": "2024-10-22T10:01:00Z"}
-    ]  # Placeholder for actual API response
-
-    return response
+    try:
+        response = test_client.get_all_orders(symbol=symbol, limit=limit)
+        return response
+    except Exception as e:
+        return {"error": str(e)}
 
 
 toolkit = [
