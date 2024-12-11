@@ -16,13 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Azure CLI Login
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_0CEBC6189EE04DA6B750881AAA9E5D30 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8D00AAEDEB8E4F21901D5955F579A175 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D925AAE0F9F6414DAA004F2B164AB43A }}
-
       - name: Azure ACR Login
         run: az acr login --name ${{ secrets.ACR_NAME }}
 
