@@ -90,3 +90,4 @@ urllib3==2.2.3
 uvicorn==0.32.1
 websockets==14.1
 yarl==1.18.3
+fastapi-healthz==1.0.0
