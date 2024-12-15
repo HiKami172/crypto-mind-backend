@@ -15,7 +15,7 @@ router.include_router(
         google_oauth_client,
         auth_backend,
         settings.auth.key,
-        redirect_url="http://localhost:3000/associate/google/callback",
+        redirect_url=settings.oauth.GOOGLE_REDIRECT_URI,
         is_verified_by_default=True
     ),
     prefix="/google"
