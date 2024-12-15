@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from app.middlewares.context import RequestMiddleware
 from app.settings import settings
@@ -41,6 +42,7 @@ def create_application() -> FastAPI:
         allow_methods=settings.ALLOWED_METHODS,
         allow_headers=settings.ALLOWED_HEADERS,
     )
+    app.add_middleware(HTTPSRedirectMiddleware)
     app.add_middleware(RequestMiddleware)
     return app
 
