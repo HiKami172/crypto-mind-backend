@@ -41,7 +41,7 @@ jobs:
           az webapp config container set \
             --name crypto-mind-backend2 \
             --resource-group crypto-mind-rg \
-            --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:latest \
-            --docker-registry-server-url https://${{ secrets.ACR_NAME }}.azurecr.io \
-            --docker-registry-server-user ${{ secrets.ACR_NAME }} \
-            --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
+            --container-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:latest \
+            --container-registry-url https://${{ secrets.ACR_NAME }}.azurecr.io \
+            --container-registry-user ${{ secrets.ACR_NAME }} \
+            --container-registry-password ${{ secrets.ACR_PASSWORD }}
