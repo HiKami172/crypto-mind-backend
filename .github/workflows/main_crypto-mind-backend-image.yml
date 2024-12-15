@@ -39,5 +39,5 @@ jobs:
       - name: Configure Web App to use the container
         run: az webapp config container set \
               --resource-group crypto-mind-rg \
-              --name crypto-mind-backend \
+              --name crypto-mind-backend2 \
               --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:latest
