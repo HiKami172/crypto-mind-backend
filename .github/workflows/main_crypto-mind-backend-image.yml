@@ -37,7 +37,11 @@ jobs:
       # Configure the Azure Web App to use the container image from ACR
       # Replace <YourResourceGroup> and 'crypto-mind-backend' with your actual resource group and app name
       - name: Configure Web App to use the container
-        run: az webapp config container set \
-              --resource-group crypto-mind-rg \
-              --name crypto-mind-backend2 \
-              --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:latest
+        run: |
+          az webapp config container set \
+            --name crypto-mind-backend2 \
+            --resource-group crypto-mind-rg \
+            --docker-custom-image-name ${{ secrets.ACR_NAME }}.azurecr.io/${{ secrets.IMAGE_NAME }}:latest \
+            --docker-registry-server-url https://${{ secrets.ACR_NAME }}.azurecr.io \
+            --docker-registry-server-user ${{ secrets.ACR_NAME }} \
+            --docker-registry-server-password ${{ secrets.ACR_PASSWORD }}
