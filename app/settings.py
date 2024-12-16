@@ -62,6 +62,7 @@ class OAuthSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+
     BROKER_ANALYTICS: int
     DEBUG: bool
     LOGGING_LEVEL: str = Field(default='DEBUG')
@@ -69,6 +70,9 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = Field()
     ALLOWED_METHODS: str
     ALLOWED_HEADERS: str
+
+    app_name: str = Field(default="CryptoMind.AI API")
+    version: str = Field(default="0.1.0")
 
     @property
     def ALLOWED_ORIGINS_LIST(self) -> list[str]:  # noqa

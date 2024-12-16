@@ -28,7 +28,11 @@ async def lifespan(_app: FastAPI):
 
 
 def create_application() -> FastAPI:
-    app = FastAPI(lifespan=lifespan)
+    app = FastAPI(
+        lifespan=lifespan,
+        title=settings.app_name,
+        version=settings.version
+    )
     register_events()
     _healthChecks = HealthCheckRegistry()
     db_sync_uri = settings.database.url.replace("+asyncpg", "")
