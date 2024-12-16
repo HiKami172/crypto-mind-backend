@@ -14,7 +14,7 @@ router = APIRouter(prefix='/threads', tags=['Threads'])
 
 
 @router.post(
-    '/',
+    '',
     name='Create Thread',
     description='Create new thread.',
     status_code=status.HTTP_201_CREATED,
@@ -29,7 +29,7 @@ async def create_thread(
 
 
 @router.get(
-    '/',
+    '',
     # response_model=ThreadList,
     name='List Threads',
     description='Get all threads with pagination.',
@@ -48,7 +48,7 @@ async def get_threads(
 
 
 @router.get(
-    '/{thread_id}/',
+    '/{thread_id}',
     name='Retrieve Thread',
     description='Get certain thread.',
     status_code=status.HTTP_200_OK,
@@ -59,7 +59,7 @@ async def get_thread(thread_id: UUID4, unit_of_work: UnitOfWorkDep, service: get
 
 
 @router.delete(
-    '/{thread_id}/',
+    '/{thread_id}',
     name='Delete Thread',
     description='Delete thread.',
     status_code=status.HTTP_204_NO_CONTENT,
@@ -74,7 +74,7 @@ async def delete_thread(
 
 
 @router.get(
-    '/{thread_id}/messages/',
+    '/{thread_id}/messages',
     status_code=status.HTTP_200_OK,
     description='Get paginated messages from specific thread.',
     name='List Messages',
@@ -96,7 +96,7 @@ class MessageRequest(BaseModel):
 
 
 @router.post(
-    '/{thread_id}/messages/',
+    '/{thread_id}/messages',
     name='Send Message',
     description='Send a message to specific thread.',
     status_code=status.HTTP_201_CREATED,
