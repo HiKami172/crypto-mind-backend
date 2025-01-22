@@ -1,6 +1,8 @@
 import uuid
 from typing import Optional
 
+from loguru import logger
+from httpx import AsyncClient
 from httpx_oauth.clients.google import GoogleOAuth2
 from typing import Annotated
 from fastapi import Depends, Request
@@ -11,7 +13,7 @@ from fastapi_users.authentication import (
 )
 from app.database import User, get_user_db
 from app.settings import settings
-from app.services import ThreadService, BinanceService
+from app.services import ThreadService, BinanceService, UserService, TradingBotService
 from app.utils.unitofwork import IUnitOfWork, UnitOfWork
 
 bearer_transport = BearerTransport(tokenUrl="auth/login")
@@ -32,8 +34,32 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = settings.auth.key
     verification_token_secret = settings.auth.key
 
+    async def fetch_google_profile(self, access_token: str) -> dict:
+        """Fetch user profile from Google using the access token."""
+        async with AsyncClient() as client:
+            response = await client.get(
+                "https://www.googleapis.com/oauth2/v1/userinfo",
+                params={"alt": "json", "access_token": access_token},
+            )
+            response.raise_for_status()
+            return response.json()
+
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} has registered.")
+        if user.oauth_accounts:
+            oauth_account = user.oauth_accounts[0]
+            if oauth_account.oauth_name == "google":
+                try:
+                    profile = await self.fetch_google_profile(oauth_account.access_token)
+                    logger.info(f"Profile: {profile}")
+                    update_dict = {
+                        "full_name": profile.get("name", ""),
+                        "avatar": profile.get("picture", ""),
+                    }
+                    await self.user_db.update(user, update_dict)
+                except Exception as e:
+                    print(f"Error fetching Google profile: {e}")
+
+        logger.info(f"User {user.id} has registered.")
 
     async def on_after_forgot_password(
             self, user: User, token: str, request: Optional[Request] = None
@@ -64,6 +90,9 @@ google_oauth_client = GoogleOAuth2(
 UnitOfWorkDep = Annotated[IUnitOfWork, Depends(UnitOfWork)]
 
 get_threads_service = Annotated[ThreadService, Depends(ThreadService)]
+get_trading_bots_service = Annotated[TradingBotService, Depends(TradingBotService)]
+get_users_service = Annotated[UserService, Depends(UserService)]
+
 
 
 async def get_binance_service() -> BinanceService:

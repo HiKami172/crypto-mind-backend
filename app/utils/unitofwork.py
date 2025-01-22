@@ -3,12 +3,19 @@ from abc import ABC, abstractmethod
 from loguru import logger
 
 from app.database import async_session
-from app.repositories.threads import MessageRepository, ThreadRepository
-from app.repositories.users import UserRepository
+from app.repositories import (
+    MessageRepository,
+    ThreadRepository,
+    UserRepository,
+    BinanceAccountRepository,
+    TradingBotRepository
+)
 
 
 class IUnitOfWork(ABC):
     users: UserRepository
+    binance_accounts: BinanceAccountRepository
+    trading_bots: TradingBotRepository
     threads: ThreadRepository
     messages: MessageRepository
 
@@ -48,6 +55,8 @@ class UnitOfWork(IUnitOfWork):
         self.users = UserRepository(self.session)
         self.threads = ThreadRepository(self.session)
         self.messages = MessageRepository(self.session)
+        self.binance_accounts = BinanceAccountRepository(self.session)
+        self.trading_bots = TradingBotRepository(self.session)
 
         return self
 

@@ -15,7 +15,7 @@ from app.routers import (
     threads,
     auth,
     users,
-    binance
+    binance, binance_accounts
 )
 
 
@@ -43,6 +43,7 @@ def create_application() -> FastAPI:
     app.include_router(auth)
     app.include_router(threads)
     app.include_router(binance)
+    app.include_router(binance_accounts)
     app.add_api_route('/health', endpoint=health_check_route(registry=_healthChecks))
 
     app.add_middleware(

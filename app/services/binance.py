@@ -1,7 +1,4 @@
-import asyncio
-
 from binance import AsyncClient, BinanceSocketManager
-from loguru import logger
 
 
 class BinanceService:
@@ -59,37 +56,3 @@ class BinanceService:
         """Fetch all coin information."""
         return await self.client.get_all_coins_info()
 
-    # WebSocket Methods
-    async def fetch_orders_via_websocket(self):
-        """Fetch orders dynamically using a WebSocket connection."""
-        orders = []
-
-        try:
-            # Open user data stream via test socket manager
-            socket = await self.test_socket_manager.user_socket()
-            logger.info(f"Socket connection established: {socket}")
-            # Run the socket and process messages manually
-            loop = asyncio.get_event_loop()
-            while True:
-                # Wait for message from WebSocket
-                message = await socket.recv()
-
-                # Process the message
-                if message:
-                    event_type = message.get("e")
-                    if event_type == "executionReport":  # Order update event
-                        orders.append(message)
-
-                    # Example: Stop after collecting some orders or based on custom logic
-                    if len(orders) >= 10:  # Adjust this threshold as needed
-                        break
-        except asyncio.CancelledError:
-            # Handle task cancellation gracefully
-            logger.warning("WebSocket task was cancelled.")
-        except Exception as e:
-            logger.error(f"WebSocket error: {e}")
-            raise
-        finally:
-            await socket.close()  # Ensure WebSocket connection is closed
-
-        return orders

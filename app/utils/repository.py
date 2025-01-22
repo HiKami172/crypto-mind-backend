@@ -66,7 +66,7 @@ class SQLAlchemyRepository(AbstractRepository):
 
         result: Result = await self.execute(statement)
 
-        return await self.fetch_data(result.scalars)
+        return list(await self.fetch_data(result.scalars))
 
     async def retrieve(self, return_result: bool = False, **whereclauses) -> M | None | Result:
         statement = select(self.model).where(*self.get_where_clauses(**whereclauses))

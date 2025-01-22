@@ -27,7 +27,7 @@ class Thread(Base):
         index=True
     )
 
-    user_id: Mapped[int] = mapped_column(ForeignKey('user.id'))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey('user.id'))
 
     messages: Mapped[list['Message']] = relationship(back_populates='thread', order_by='asc(Message.created_at)')
     user: Mapped['User'] = relationship(back_populates='threads')
